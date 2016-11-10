@@ -1,16 +1,13 @@
-from Lattice import *
+import Lattice
 
 
 def main():
-    T = 10
-    R = 7
-    P = 0
-    S = 0
+    l = Lattice.Lattice(50, 100)
 
-    l = Lattice(5, 5)
     l.randPopulate()
     print(l)
-    printNeighbours(l.getNeighbours(0, 0))
+
+    l.run(10)
 
 
 main()

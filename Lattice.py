@@ -1,10 +1,29 @@
 # import numpy as np
 from random import randint
 
+T = 10
+R = 7
+P = 0
+S = 0
+
+
 def printNeighbours(neighbours):
     print(str(neighbours[5]) + "  ,  " + str(neighbours[6]) + "  ,  " + str(neighbours[2]) + "\n" + str(
         neighbours[7]) + "  ,  X  ,  " + str(neighbours[3]) + "\n" + str(neighbours[0]) + "  ,  " + str(
         neighbours[1]) + "  ,  " + str(neighbours[4]))
+
+
+def computePayoff(player1, player2):
+    if player1 == "C":
+        if player2 == "C":
+            return R
+        if player2 == "D":
+            return S
+    if player1 == "D":
+        if player2 == "C":
+            return T
+        if player2 == "D":
+            return P
 
 
 class Lattice:
@@ -18,9 +37,12 @@ class Lattice:
         toprint = ""
         for i in range(self.r):
             for j in range(self.c):
-                toprint += str(self.matrix[i][j])
+                if self.matrix[i][j][0] == "C":
+                    toprint += str('\x1b[0;30;44m' + self.matrix[i][j] + '\x1b[0m')
+                else:
+                    toprint += str('\x1b[0;30;41m' + self.matrix[i][j] + '\x1b[0m')
                 if j != self.c - 1:
-                    toprint += "  ,  "
+                    toprint += "" #separator
             toprint += "\n"
         return toprint
 
@@ -43,6 +65,10 @@ class Lattice:
                 neighbours.append(self.matrix[i][j + 1])  # Right
             if i == self.r - 1 and j == self.c - 1:
                 neighbours.append(self.matrix[0][0])  # Bot-Right
+            elif i == self.r - 1:
+                neighbours.append(self.matrix[0][j + 1])  # Bot-Right
+            elif j == self.c - 1:
+                neighbours.append(self.matrix[i + 1][0])  # Bot-Right
             else:
                 neighbours.append(self.matrix[i + 1][j + 1])  # Bot-Right
 
@@ -59,3 +85,46 @@ class Lattice:
         for i in range(self.r):
             for j in range(self.c):
                 self.matrix[i][j] = chr(randint(67, 68))
+
+    def computePayoffFor(self, i, j):
+        neighbours = self.getNeighbours(i, j)
+        sumPayoffs = 0
+        for neighbour in neighbours:
+            sumPayoffs += computePayoff(self.matrix[i][j], neighbour[0])
+        return sumPayoffs
+
+    def computeAllPayoffs(self):
+        for i in range(self.r):
+            for j in range(self.c):
+                self.matrix[i][j] = (self.matrix[i][j], self.computePayoffFor(i, j))
+
+    def selectBestAction(self, i, j):
+        neighbours = self.getNeighbours(i, j)
+        neighbours.append(self.matrix[i][j])
+        maxPayoff = 0
+        for neighbour in neighbours:
+            if neighbour[1] >= maxPayoff:
+                maxPayoff = neighbour[1]
+                nextAction = (neighbour[0],)
+        self.matrix[i][j] = self.matrix[i][j] + nextAction
+
+    def selectAllBestAction(self):
+        for i in range(self.r):
+            for j in range(self.c):
+                self.selectBestAction(i,j)
+
+    def applyActions(self):
+        for i in range(self.r):
+            for j in range(self.c):
+                self.matrix[i][j] = self.matrix[i][j][2]
+
+    def run(self, round):
+        for i in range(round):
+            self.computeAllPayoffs()
+            self.selectAllBestAction()
+            self.applyActions()
+            print(self)
+
+
+
+
