@@ -1,5 +1,5 @@
-# import numpy as np
 from random import randint
+#import statistics
 
 T = 10
 R = 7
@@ -31,6 +31,8 @@ class Lattice:
         self.r = row
         self.c = col
         self.matrix = [[0 for x in range(self.c)] for y in range(self.r)]
+        self.coopHistory = []
+        self.total = row*col
 
     def __repr__(self):
         # return '\n'.join([''.join(['{:4}'.format(item) for item in self.r]) for self.r in self.matrix])
@@ -42,14 +44,14 @@ class Lattice:
                 else:
                     toprint += str('\x1b[0;30;41m' + self.matrix[i][j] + '\x1b[0m')
                 if j != self.c - 1:
-                    toprint += "" #separator
+                    toprint += ""  # separator
             toprint += "\n"
         return toprint
 
     def getNeighbours(self, i, j):
         neighbours = []
 
-        if 0 <= i < self.r and 0 <= j < self.c:  # normal case
+        if 0 <= i < self.r and 0 <= j < self.c:
             if i == self.r - 1:
                 neighbours.append(self.matrix[0][j - 1])  # Bot-Left
                 neighbours.append(self.matrix[0][j])  # Bot
@@ -111,20 +113,42 @@ class Lattice:
     def selectAllBestAction(self):
         for i in range(self.r):
             for j in range(self.c):
-                self.selectBestAction(i,j)
+                self.selectBestAction(i, j)
 
     def applyActions(self):
         for i in range(self.r):
             for j in range(self.c):
                 self.matrix[i][j] = self.matrix[i][j][2]
 
-    def run(self, round):
+    def run(self, round, mode):
         for i in range(round):
             self.computeAllPayoffs()
             self.selectAllBestAction()
             self.applyActions()
-            print(self)
+            y = self.matrix
+            self.computeCoopLevel()
+            if mode == "any":
+                if i == 0 or i == 1 or i == 5 or i == 10 or i == 20 or i == 50:
+                    print(str(i)+": "+str(self.coopHistory[len(self.coopHistory)-1]*100)+"%")
+            elif mode == "final":
+                if i == 100:
+                    print(str(i) + ": " + str(self.coopHistory[len(self.coopHistory) - 1] * 100) + "%")
+
+            #self.computeVariance()
+            #print(self)
+
+    def computeCoopLevel(self):
+        coopLvl = 0
+        for i in range(self.r):
+            for j in range(self.c):
+                if self.matrix[i][j] == "C":
+                    coopLvl += 1
+        self.coopHistory.append(coopLvl / self.total)
+        return coopLvl / self.total
 
 
-
-
+"""
+    def computeVariance(self):
+        if len(self.coopHistory) > 10:
+            print(statistics.pvariance(self.coopHistory[10:]))
+"""
