@@ -1,6 +1,6 @@
-import Lattice
 import time
-import Plotter
+
+import Lattice
 
 nrSim = 100
 nrRoundsPerSim = 100
@@ -26,14 +26,14 @@ def main():
     averageCoop = [0] * nrRoundsPerSim
     finalCoop = []
 
-    # l = Lattice.Lattice(50, 50)
-    # l.randPopulate()
-    # l.run(100, "any")
+    l = Lattice.Lattice(50, 50)
+    l.randPopulate()
+    l.run(100, "any", True)
 
-    run(nrSim, averageCoop, finalCoop)
+    #run(nrSim, averageCoop, finalCoop)
 
-    p = Plotter.Plotter(averageCoop, "Cooperation level over time, averaged over 100 simulations", "Round", "Cooperation level", "notFinal")
-    p = Plotter.Plotter(finalCoop, "Distribution of the final cooperation levels", "Final Cooperation Level", "Number of Simulations", "final", nrSim)
+    #p = Plotter.Plotter(averageCoop, "Cooperation level over time, averaged over 100 simulations", "Round", "Cooperation level", "notFinal")
+    #p = Plotter.Plotter(finalCoop, "Distribution of the final cooperation levels", "Final Cooperation Level", "Number of Simulations", "final", nrSim)
 
 
 main()
