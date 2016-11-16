@@ -7,6 +7,7 @@ nrRoundsPerSim = 100
 
 def run(rounds, averageCoop, finalCoop):
     for i in range(rounds):
+
         print("ROUND : "+str(i))
         start_time = time.time()
         l = Lattice.Lattice(50, 50)
@@ -31,9 +32,8 @@ def main():
 
     run(nrSim, averageCoop, finalCoop)
 
-    print(len(finalCoop))
-    p = Plotter.Plotter(averageCoop, "Round", "Cooperation level", "notFinal")
-    p = Plotter.Plotter(finalCoop, "Simulation Number", "Final Cooperation Level", "final", nrSim)
+    p = Plotter.Plotter(averageCoop, "Cooperation level over time, averaged over 100 simulations", "Round", "Cooperation level", "notFinal")
+    p = Plotter.Plotter(finalCoop, "Distribution of the final cooperation levels", "Final Cooperation Level", "Number of Simulations", "final", nrSim)
 
 
 main()

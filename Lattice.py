@@ -1,5 +1,5 @@
 from random import randint
-#import statistics
+
 
 T = 10
 R = 7
@@ -120,7 +120,7 @@ class Lattice:
             for j in range(self.c):
                 self.matrix[i][j] = self.matrix[i][j][2]
 
-    def run(self, round, mode):
+    def run(self, round, mode, toPrint=False):
         for i in range(round):
             self.computeAllPayoffs()
             self.selectAllBestAction()
@@ -135,7 +135,8 @@ class Lattice:
                     print(str(i) + ": " + str(self.coopHistory[len(self.coopHistory) - 1] * 100) + "%")
 
             #self.computeVariance()
-            #print(self)
+            if(toPrint):
+                print(self)
 
     def computeCoopLevel(self):
         coopLvl = 0
