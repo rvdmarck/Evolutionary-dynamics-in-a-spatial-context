@@ -1,10 +1,13 @@
 from random import randint
-
+from termcolor import colored
 
 T = 10
 R = 7
 P = 0
 S = 0
+
+MOORE = "Moore"
+VON_NEUMANN = "Von Neumann"
 
 
 def printNeighbours(neighbours):
@@ -35,23 +38,24 @@ class Lattice:
         self.total = row*col
 
     def __repr__(self):
-        # return '\n'.join([''.join(['{:4}'.format(item) for item in self.r]) for self.r in self.matrix])
         toprint = ""
         for i in range(self.r):
             for j in range(self.c):
                 if self.matrix[i][j][0] == "C":
-                    toprint += str('\x1b[0;30;44m' + self.matrix[i][j] + '\x1b[0m')
+                    #toprint += str('\x1b[0;30;44m' + self.matrix[i][j] + '\x1b[0m')
+                    toprint += colored(str(self.matrix[i][j]), 'blue', attrs=['reverse'])
                 else:
-                    toprint += str('\x1b[0;30;41m' + self.matrix[i][j] + '\x1b[0m')
+                    #toprint += str('\x1b[0;30;41m' + self.matrix[i][j] + '\x1b[0m')
+                    toprint += colored(str(self.matrix[i][j]), 'red', attrs=['reverse', 'blink'])
                 if j != self.c - 1:
                     toprint += ""  # separator
             toprint += "\n"
         return toprint
 
-    def getNeighbours(self, i, j):
+    def getNeighbours(self, i, j, mode = MOORE):
         neighbours = []
 
-        if 0 <= i < self.r and 0 <= j < self.c:
+        if mode == MOORE:
             if i == self.r - 1:
                 neighbours.append(self.matrix[0][j - 1])  # Bot-Left
                 neighbours.append(self.matrix[0][j])  # Bot
@@ -77,7 +81,17 @@ class Lattice:
             neighbours.append(self.matrix[i - 1][j - 1])  # Top-Left
             neighbours.append(self.matrix[i - 1][j])  # Top
             neighbours.append(self.matrix[i][j - 1])  # Left
-
+        elif mode == VON_NEUMANN:
+            if i == self.r - 1:
+                neighbours.append(self.matrix[0][j]) #Bot
+            else:
+                neighbours.append(self.matrix[i + 1][j])  # Bot
+            if j == self.c - 1:
+                neighbours.append(self.matrix[i][0])  # Right
+            else:
+                neighbours.append(self.matrix[i][j + 1])  # Right
+            neighbours.append(self.matrix[i - 1][j])  # Top
+            neighbours.append(self.matrix[i][j - 1])  # Left
         return neighbours
 
     def set(self, value, i, j):
@@ -88,19 +102,19 @@ class Lattice:
             for j in range(self.c):
                 self.matrix[i][j] = chr(randint(67, 68))
 
-    def computePayoffFor(self, i, j):
+    def computePayoffFor(self, i, j, mode = MOORE):
         neighbours = self.getNeighbours(i, j)
         sumPayoffs = 0
         for neighbour in neighbours:
             sumPayoffs += computePayoff(self.matrix[i][j], neighbour[0])
         return sumPayoffs
 
-    def computeAllPayoffs(self):
+    def computeAllPayoffs(self, mode = MOORE):
         for i in range(self.r):
             for j in range(self.c):
-                self.matrix[i][j] = (self.matrix[i][j], self.computePayoffFor(i, j))
+                self.matrix[i][j] = (self.matrix[i][j], self.computePayoffFor(i, j, mode))
 
-    def selectBestAction(self, i, j):
+    def selectBestAction(self, i, j, mode = MOORE):
         neighbours = self.getNeighbours(i, j)
         neighbours.append(self.matrix[i][j])
         maxPayoff = 0
@@ -110,20 +124,23 @@ class Lattice:
                 nextAction = (neighbour[0],)
         self.matrix[i][j] = self.matrix[i][j] + nextAction
 
-    def selectAllBestAction(self):
+    def selectAllBestAction(self, mode = MOORE):
         for i in range(self.r):
             for j in range(self.c):
-                self.selectBestAction(i, j)
+                self.selectBestAction(i, j, mode)
 
     def applyActions(self):
         for i in range(self.r):
             for j in range(self.c):
                 self.matrix[i][j] = self.matrix[i][j][2]
 
-    def run(self, round, mode, toPrint=False):
+    def run(self, round, mode, toPrint=False, neighborhood = MOORE):
+        if(toPrint):
+            print(self)
+        self.computeCoopLevel()
         for i in range(round):
-            self.computeAllPayoffs()
-            self.selectAllBestAction()
+            self.computeAllPayoffs(neighborhood)
+            self.selectAllBestAction(neighborhood)
             self.applyActions()
             y = self.matrix
             self.computeCoopLevel()
@@ -134,7 +151,6 @@ class Lattice:
                 if i == 100:
                     print(str(i) + ": " + str(self.coopHistory[len(self.coopHistory) - 1] * 100) + "%")
 
-            #self.computeVariance()
             if(toPrint):
                 print(self)
 
@@ -148,8 +164,4 @@ class Lattice:
         return coopLvl / self.total
 
 
-"""
-    def computeVariance(self):
-        if len(self.coopHistory) > 10:
-            print(statistics.pvariance(self.coopHistory[10:]))
-"""
+

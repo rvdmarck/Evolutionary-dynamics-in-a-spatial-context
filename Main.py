@@ -3,16 +3,23 @@ import time
 import Plotter
 
 nrSim = 100
-nrRoundsPerSim = 100
+nrRoundsPerSim = 99
+size = 50
+sim = 1
+
+MOORE = "Moore"
+VON_NEUMANN = "Von Neumann"
+
+mode = VON_NEUMANN
 
 def run(rounds, averageCoop, finalCoop):
     for i in range(rounds):
 
         print("ROUND : "+str(i))
         start_time = time.time()
-        l = Lattice.Lattice(50, 50)
+        l = Lattice.Lattice(size, size)
         l.randPopulate()
-        l.run(nrRoundsPerSim, "final")
+        l.run(nrRoundsPerSim, "final", neighborhood = mode)
         for j in range(len(l.coopHistory)):
             averageCoop[j] += l.coopHistory[j]
         finalCoop.append(l.coopHistory[nrRoundsPerSim-1])
@@ -23,17 +30,18 @@ def run(rounds, averageCoop, finalCoop):
 
 def main():
 
-    averageCoop = [0] * nrRoundsPerSim
+    averageCoop = [0] * (nrRoundsPerSim+1)
     finalCoop = []
 
-    # l = Lattice.Lattice(50, 50)
-    # l.randPopulate()
-    # l.run(100, "any")
+    if sim == 1 :
+        l = Lattice.Lattice(size, size)
+        l.randPopulate()
+        l.run(100, "any", True, neighborhood = mode)
+    elif sim == 2 :
+        run(nrSim, averageCoop, finalCoop)
 
-    run(nrSim, averageCoop, finalCoop)
-
-    p = Plotter.Plotter(averageCoop, "Cooperation level over time, averaged over 100 simulations", "Round", "Cooperation level", "notFinal")
-    p = Plotter.Plotter(finalCoop, "Distribution of the final cooperation levels", "Final Cooperation Level", "Number of Simulations", "final", nrSim)
+        p = Plotter.Plotter(averageCoop, "Cooperation level over time, averaged over 100 simulations", "Round", "Cooperation level", "notFinal")
+        p = Plotter.Plotter(finalCoop, "Distribution of the final cooperation levels", "Final Cooperation Level", "Number of Simulations", "final", nrSim)
 
 
 main()
