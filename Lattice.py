@@ -1,14 +1,14 @@
-from random import randint
+from random import randint, random
 from termcolor import colored
+from math import floor
 
 T = 10
 R = 7
 P = 0
-S = 0
+S = 3
 
 MOORE = "Moore"
 VON_NEUMANN = "Von Neumann"
-
 
 def printNeighbours(neighbours):
     print(str(neighbours[5]) + "  ,  " + str(neighbours[6]) + "  ,  " + str(neighbours[2]) + "\n" + str(
@@ -27,6 +27,21 @@ def computePayoff(player1, player2):
             return T
         if player2 == "D":
             return P
+
+def randitem(l):
+
+    # Make the probabilities add up to 1, preserving ratios
+    s = sum([b for (a,b) in l])
+    l2 = []
+    for (a,b) in l:
+        l2.append((a, b/s))
+
+    r = random()
+    for (a,b) in l2:
+        if r < b:
+            return a
+        else:
+            r -= b
 
 
 class Lattice:
@@ -103,7 +118,7 @@ class Lattice:
                 self.matrix[i][j] = chr(randint(67, 68))
 
     def computePayoffFor(self, i, j, mode = MOORE):
-        neighbours = self.getNeighbours(i, j)
+        neighbours = self.getNeighbours(i, j, mode)
         sumPayoffs = 0
         for neighbour in neighbours:
             sumPayoffs += computePayoff(self.matrix[i][j], neighbour[0])
@@ -115,7 +130,7 @@ class Lattice:
                 self.matrix[i][j] = (self.matrix[i][j], self.computePayoffFor(i, j, mode))
 
     def selectBestAction(self, i, j, mode = MOORE):
-        neighbours = self.getNeighbours(i, j)
+        neighbours = self.getNeighbours(i, j, mode)
         neighbours.append(self.matrix[i][j])
         maxPayoff = 0
         for neighbour in neighbours:
@@ -124,10 +139,31 @@ class Lattice:
                 nextAction = (neighbour[0],)
         self.matrix[i][j] = self.matrix[i][j] + nextAction
 
-    def selectAllBestAction(self, mode = MOORE):
+    def selectRandomAction(self, i, j, mode = MOORE):
+        neighbours = self.getNeighbours(i, j, mode)
+        targetNeighbour = neighbours[randint(0, len(neighbours)-1)]
+        p = (1 + ((targetNeighbour[1]-self.matrix[i][j][1]) /  (len(neighbours)*10)))/2
+
+        r = randint(0,100)
+        r = r/100
+        if(r <= p):
+            take = True
+        else:
+            take = False
+
+        if take:
+            self.matrix[i][j] = self.matrix[i][j] + (targetNeighbour[0],)
+        else:
+            self.matrix[i][j] = self.matrix[i][j] + (self.matrix[i][j][0],)
+
+
+    def selectAllBestAction(self, game, mode = MOORE):
         for i in range(self.r):
             for j in range(self.c):
-                self.selectBestAction(i, j, mode)
+                if game == "prisoners":
+                    self.selectBestAction(i, j, mode)
+                elif game == "snowdrift":
+                    self.selectRandomAction(i, j, mode)
 
     def applyActions(self):
         for i in range(self.r):
@@ -140,7 +176,7 @@ class Lattice:
         self.computeCoopLevel()
         for i in range(round):
             self.computeAllPayoffs(neighborhood)
-            self.selectAllBestAction(neighborhood)
+            self.selectAllBestAction("snowdrift", neighborhood)
             self.applyActions()
             y = self.matrix
             self.computeCoopLevel()
@@ -153,6 +189,7 @@ class Lattice:
 
             if(toPrint):
                 print(self)
+
 
     def computeCoopLevel(self):
         coopLvl = 0

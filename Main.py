@@ -10,12 +10,12 @@ sim = 1
 MOORE = "Moore"
 VON_NEUMANN = "Von Neumann"
 
-mode = VON_NEUMANN
+mode = MOORE
 
 def run(rounds, averageCoop, finalCoop):
     for i in range(rounds):
 
-        print("ROUND : "+str(i))
+        print("SIMULATION : "+str(i))
         start_time = time.time()
         l = Lattice.Lattice(size, size)
         l.randPopulate()
