@@ -36,7 +36,7 @@ def main():
     if sim == 1 :
         l = Lattice.Lattice(size, size)
         l.randPopulate()
-        l.run(100, "any", True, neighborhood = mode)
+        l.run(100, "any", False, neighborhood = mode)
     elif sim == 2 :
         run(nrSim, averageCoop, finalCoop)
 

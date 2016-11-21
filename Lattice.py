@@ -183,6 +183,7 @@ class Lattice:
             if mode == "any":
                 if i == 0 or i == 1 or i == 5 or i == 10 or i == 20 or i == 50:
                     print(str(i)+": "+str(self.coopHistory[len(self.coopHistory)-1]*100)+"%")
+                    print(self)
             elif mode == "final":
                 if i == 100:
                     print(str(i) + ": " + str(self.coopHistory[len(self.coopHistory) - 1] * 100) + "%")
