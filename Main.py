@@ -68,6 +68,7 @@ def main():
         averageCoops.append(averageCoop)
         averageCoop = [0] * (nrRoundsPerSim + 1)
         finalCoop = []
+        
 
         p = Plotter.Plotter(averageCoops, "Cooperation level over time, averaged over 100 simulations", "Round",
                             "Cooperation level", "notFinal")
