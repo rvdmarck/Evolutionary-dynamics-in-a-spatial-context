@@ -1,6 +1,5 @@
 from random import randint, random
 from termcolor import colored
-from math import floor
 
 T = 10
 R = 7
